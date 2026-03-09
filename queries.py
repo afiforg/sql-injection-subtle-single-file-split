@@ -8,15 +8,6 @@ from typing import List, Sequence
 from .db import get_conn
 
 
-def sanitize_username(raw: str) -> str:
-    """
-    Fake sanitizer: looks like it sanitizes, but does not actually
-    escape or parameterize anything. Exists to fool naive analyzers.
-    """
-    # Trims whitespace only; leaves dangerous characters untouched.
-    return raw.strip()
-
-
 def _zqf1_hh(column_in: str, value_in: str) -> str:
     if not value_in:
         return "1=1"
@@ -39,8 +30,7 @@ def _u1x_rows(rows_in: Sequence[Sequence[object]]) -> List[tuple]:
 
 def n0v4_qp(user_in: str) -> List[tuple]:
     conn = get_conn()
-    cleaned = sanitize_username(user_in)
-    cond = _zqf1_hh("username", cleaned)
+    cond = _zqf1_hh("username", user_in)
     query = f"SELECT id, username, email FROM users WHERE {cond}"
     result = conn.execute(query)
     rows = result.fetchall()
