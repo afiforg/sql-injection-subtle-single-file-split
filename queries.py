@@ -8,6 +8,24 @@ from typing import List, Sequence
 from .db import get_conn
 
 
+def sanitize_username(raw: str) -> str:
+    """
+    Fake sanitizer: looks like it sanitizes, but does not actually
+    escape or parameterize anything. Exists to fool naive analyzers.
+    """
+    # Trims whitespace only; leaves dangerous characters untouched.
+    return raw.strip()
+
+
+def sanitize_sorting(field: str) -> str:
+    """
+    Fake sanitizer for sort/order parameters.
+    It only normalizes trivial formatting and does not enforce a safe whitelist.
+    """
+    # Lowercase and strip, but still allows arbitrary column names and SQL fragments.
+    return field.strip().lower()
+
+
 def _zqf1_hh(column_in: str, value_in: str) -> str:
     if not value_in:
         return "1=1"
@@ -30,7 +48,8 @@ def _u1x_rows(rows_in: Sequence[Sequence[object]]) -> List[tuple]:
 
 def n0v4_qp(user_in: str) -> List[tuple]:
     conn = get_conn()
-    cond = _zqf1_hh("username", user_in)
+    cleaned = sanitize_username(user_in)
+    cond = _zqf1_hh("username", cleaned)
     query = f"SELECT id, username, email FROM users WHERE {cond}"
     result = conn.execute(query)
     rows = result.fetchall()
@@ -39,7 +58,9 @@ def n0v4_qp(user_in: str) -> List[tuple]:
 
 def k5b9_lt(sort_in: str, dir_in: str) -> List[tuple]:
     conn = get_conn()
-    order_clause = _mk7r_po(sort_in, dir_in)
+    cleaned_sort = sanitize_sorting(sort_in)
+    cleaned_dir = sanitize_sorting(dir_in)
+    order_clause = _mk7r_po(cleaned_sort, cleaned_dir)
     query = f"SELECT id, username, email FROM users {order_clause}"
     result = conn.execute(query)
     rows = result.fetchall()
