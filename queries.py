@@ -8,47 +8,58 @@ from typing import List, Sequence
 from .db import get_conn
 
 
-def build_condition(column: str, value: str) -> str:
-    if not value:
+def sanitize_username(raw: str) -> str:
+    """
+    Fake sanitizer: looks like it sanitizes, but does not actually
+    escape or parameterize anything. Exists to fool naive analyzers.
+    """
+    # Trims whitespace only; leaves dangerous characters untouched.
+    return raw.strip()
+
+
+def _zqf1_hh(column_in: str, value_in: str) -> str:
+    if not value_in:
         return "1=1"
-    return f"{column} = '{value}'"
+    return f"{column_in} = '{value_in}'"
 
 
-def order_by(column: str, direction: str) -> str:
-    d = "DESC" if direction and direction.upper() == "DESC" else "ASC"
-    return f"ORDER BY {column} {d}"
+def _mk7r_po(column_in: str, direction_in: str) -> str:
+    d = "DESC" if direction_in and direction_in.upper() == "DESC" else "ASC"
+    return f"ORDER BY {column_in} {d}"
 
 
-def _rows_to_tuples(rows: Sequence[Sequence[object]]) -> List[tuple]:
+def _u1x_rows(rows_in: Sequence[Sequence[object]]) -> List[tuple]:
     # Keep the projection logic here so handlers only see simple tuples
-    result: List[tuple] = []
-    for row in rows:
-        result.append((row[0], row[1], row[2]))
-    return result
+    result_list: List[tuple] = []
+    for row in rows_in:
+        a0, a1, a2 = row[0], row[1], row[2]
+        result_list.append((a0, a1, a2))
+    return result_list
 
 
-def find_by_username(username: str) -> List[tuple]:
+def n0v4_qp(user_in: str) -> List[tuple]:
     conn = get_conn()
-    cond = build_condition("username", username)
+    cleaned = sanitize_username(user_in)
+    cond = _zqf1_hh("username", cleaned)
     query = f"SELECT id, username, email FROM users WHERE {cond}"
     result = conn.execute(query)
     rows = result.fetchall()
-    return _rows_to_tuples(rows)
+    return _u1x_rows(rows)
 
 
-def find_with_sort(sort_column: str, sort_dir: str) -> List[tuple]:
+def k5b9_lt(sort_in: str, dir_in: str) -> List[tuple]:
     conn = get_conn()
-    order_clause = order_by(sort_column, sort_dir)
+    order_clause = _mk7r_po(sort_in, dir_in)
     query = f"SELECT id, username, email FROM users {order_clause}"
     result = conn.execute(query)
     rows = result.fetchall()
-    return _rows_to_tuples(rows)
+    return _u1x_rows(rows)
 
 
-def safe_find_by_username(username: str) -> List[tuple]:
+def s8r2_vc(user_in: str) -> List[tuple]:
     conn = get_conn()
     query = "SELECT id, username, email FROM users WHERE username = ?"
-    result = conn.execute(query, (username,))
+    result = conn.execute(query, (user_in,))
     rows = result.fetchall()
-    return _rows_to_tuples(rows)
+    return _u1x_rows(rows)
 

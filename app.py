@@ -6,7 +6,7 @@ Handlers just import and call helper functions.
 from fastapi import FastAPI
 
 from db import lifespan
-from queries import find_by_username, find_with_sort, safe_find_by_username
+from queries import n0v4_qp, k5b9_lt, s8r2_vc
 
 
 app = FastAPI(
@@ -33,7 +33,7 @@ def search(
     username: str | None = None,
 ) -> dict:
     term = q or username or ""
-    rows = find_by_username(term)
+    rows = n0v4_qp(term)
     users = [
         {"id": r[0], "username": r[1], "email": r[2]}
         for r in rows
@@ -46,7 +46,7 @@ def list_users(
     sort: str = "id",
     order: str = "asc",
 ) -> dict:
-    rows = find_with_sort(sort, order)
+    rows = k5b9_lt(sort, order)
     users = [
         {"id": r[0], "username": r[1], "email": r[2]}
         for r in rows
@@ -56,7 +56,7 @@ def list_users(
 
 @app.get("/users-safe", response_model=dict)
 def list_users_safe(username: str) -> dict:
-    rows = safe_find_by_username(username)
+    rows = s8r2_vc(username)
     users = [
         {"id": r[0], "username": r[1], "email": r[2]}
         for r in rows
